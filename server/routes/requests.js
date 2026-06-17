@@ -22,19 +22,19 @@ router.post('/', authorize('patient', 'admin'), requestValidation, validate, cre
 // Get own requests (patient)
 router.get('/my', authorize('patient'), getMyRequests);
 
-// Admin see all
-router.get('/', authorize('admin'), getAllRequests);
+// Admin, hospital, coordinator see all
+router.get('/', authorize('admin', 'hospital', 'coordinator'), getAllRequests);
 
-// Single request - any authenticated user
+// Single request — any authenticated user
 router.get('/:id', getRequest);
 
-// Admin verifies
-router.put('/:id/verify', authorize('admin'), verifyRequest);
+// Hospital OR admin verifies (auto-triggers matching)
+router.put('/:id/verify', authorize('admin', 'hospital'), verifyRequest);
 
-// Cancel - patient or admin
-router.put('/:id/cancel', authorize('patient', 'admin'), cancelRequest);
+// Cancel — patient, admin, hospital, or coordinator
+router.put('/:id/cancel', authorize('patient', 'admin', 'hospital', 'coordinator'), cancelRequest);
 
-// Admin closes/expires
-router.put('/:id/close', authorize('admin'), closeRequest);
+// Admin, hospital, coordinator closes/expires
+router.put('/:id/close', authorize('admin', 'hospital', 'coordinator'), closeRequest);
 
 export default router;

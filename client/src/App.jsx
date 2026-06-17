@@ -23,6 +23,9 @@ import AdminUsers         from './pages/admin/AdminUsers'
 import AdminRequests      from './pages/admin/AdminRequests'
 import RequestDetail      from './pages/admin/RequestDetail'
 
+import HospitalDashboard  from './pages/hospital/HospitalDashboard'
+import HospitalRequests   from './pages/hospital/HospitalRequests'
+
 const PageWrapper = ({ children }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -35,7 +38,7 @@ const PageWrapper = ({ children }) => (
 
 const RoleRedirect = () => {
   const { user } = useAuth()
-  const map = { donor: '/donor', patient: '/patient', admin: '/admin' }
+  const map = { donor: '/donor', patient: '/patient', admin: '/admin', hospital: '/hospital', coordinator: '/admin' }
   return <Navigate to={map[user?.role] || '/'} replace />
 }
 
@@ -67,10 +70,17 @@ function App() {
           </Route>
 
           {/* Admin Dashboard */}
-          <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><DashboardLayout /></ProtectedRoute>}>
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin', 'coordinator']}><DashboardLayout /></ProtectedRoute>}>
             <Route index element={<PageWrapper><AdminDashboard /></PageWrapper>} />
             <Route path="users" element={<PageWrapper><AdminUsers /></PageWrapper>} />
             <Route path="requests" element={<PageWrapper><AdminRequests /></PageWrapper>} />
+            <Route path="requests/:id" element={<PageWrapper><RequestDetail /></PageWrapper>} />
+          </Route>
+
+          {/* Hospital Dashboard */}
+          <Route path="/hospital" element={<ProtectedRoute allowedRoles={['hospital']}><DashboardLayout /></ProtectedRoute>}>
+            <Route index element={<PageWrapper><HospitalDashboard /></PageWrapper>} />
+            <Route path="requests" element={<PageWrapper><HospitalRequests /></PageWrapper>} />
             <Route path="requests/:id" element={<PageWrapper><RequestDetail /></PageWrapper>} />
           </Route>
 

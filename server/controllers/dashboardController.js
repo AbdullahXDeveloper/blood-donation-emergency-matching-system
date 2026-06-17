@@ -69,6 +69,22 @@ export const getDashboardStats = async (req, res) => {
       updatedAt: { $gte: today },
     });
 
+    // Match acceptance rate
+    const totalMatches = await DonorMatch.countDocuments();
+    const acceptedMatches = await DonorMatch.countDocuments({ status: { $in: ['committed', 'donated'] } });
+    const matchAcceptanceRate = totalMatches > 0 ? ((acceptedMatches / totalMatches) * 100).toFixed(1) : 0;
+
+    // Average time to fulfillment
+    const fulfilledReqs = await BloodRequest.find({ status: 'fulfilled' }).select('createdAt updatedAt');
+    let avgFulfillmentHours = 0;
+    if (fulfilledReqs.length > 0) {
+      const totalHours = fulfilledReqs.reduce((acc, req) => {
+        const diffMs = new Date(req.updatedAt) - new Date(req.createdAt);
+        return acc + (diffMs / (1000 * 60 * 60));
+      }, 0);
+      avgFulfillmentHours = (totalHours / fulfilledReqs.length).toFixed(1);
+    }
+
     res.json({
       donors: { total: totalDonors, available: availableDonors },
       requests: {
@@ -83,6 +99,10 @@ export const getDashboardStats = async (req, res) => {
       },
       users: { total: totalUsers },
       donations: { total: totalDonations },
+      impact: {
+        matchAcceptanceRate,
+        avgFulfillmentHours,
+      },
       charts: {
         requestsByBloodGroup,
         requestsOverTime,

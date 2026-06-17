@@ -24,9 +24,10 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['donor', 'patient', 'admin'],
+    enum: ['donor', 'patient', 'hospital', 'coordinator', 'admin'],
     default: 'donor',
   },
+
 }, { timestamps: true });
 
 // Hash password before save

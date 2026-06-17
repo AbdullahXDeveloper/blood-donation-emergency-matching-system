@@ -7,7 +7,8 @@ import BloodGroupBadge from '../../components/BloodGroupBadge'
 import { getErrorMessage, formatDate } from '../../utils'
 import { motion } from 'framer-motion'
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
 } from 'recharts'
 import {
   FiUsers, FiDroplet, FiActivity, FiClock, FiArrowRight, FiCheckCircle
@@ -62,6 +63,12 @@ export default function AdminDashboard() {
     date: d._id, requests: d.count
   })) || []
 
+  const donorsByBloodGroup = stats?.charts?.donorsByBloodGroup?.map(d => ({
+    name: d._id, value: d.count
+  })) || []
+
+  const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#64748b']
+
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="page-container">
       <div className="flex items-center justify-between mb-8">
@@ -77,40 +84,73 @@ export default function AdminDashboard() {
 
       {/* Top row: 4 stats cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
           <StatsCard icon={FiUsers}    label="Total Donors"         value={stats.donors.total}           color="red" />
           <StatsCard icon={FiActivity} label="Active Requests"      value={stats.requests.matching + stats.requests.pending} color="orange" />
           <StatsCard icon={FiDroplet}  label="Fulfilled Today"      value={stats.requests.fulfilledToday} color="green" trendText={`Total: ${stats.requests.fulfilled}`} />
           <StatsCard icon={FiClock}    label="Pending Verification" value={stats.requests.pending}       color="yellow" />
+          <StatsCard icon={FiCheckCircle} label="Match Accept Rate" value={`${stats.impact?.matchAcceptanceRate || 0}%`} color="blue" />
+          <StatsCard icon={FiClock}       label="Avg Fulfillment"   value={`${stats.impact?.avgFulfillmentHours || 0}h`} color="purple" />
         </div>
       )}
 
-      {/* Middle: AreaChart */}
-      <div className="card mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold font-['Space_Grotesk'] text-white">Requests Over Time (Last 7 Days)</h2>
-        </div>
-        {requestsOverTime.length === 0 ? (
-          <div className="h-64 flex items-center justify-center text-neutral-600 text-sm">No data available</div>
-        ) : (
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={requestsOverTime}>
-                <defs>
-                  <linearGradient id="colorRequests" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fill: '#737373', fontSize: 12 }} axisLine={false} tickLine={false} dy={10} />
-                <YAxis tick={{ fill: '#737373', fontSize: 12 }} axisLine={false} tickLine={false} dx={-10} allowDecimals={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="requests" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorRequests)" />
-              </AreaChart>
-            </ResponsiveContainer>
+      {/* Middle: Charts */}
+      <div className="grid lg:grid-cols-3 gap-8 mb-8">
+        <div className="card lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold font-['Space_Grotesk'] text-white">Requests Over Time (Last 7 Days)</h2>
           </div>
-        )}
+          {requestsOverTime.length === 0 ? (
+            <div className="h-64 flex items-center justify-center text-neutral-600 text-sm">No data available</div>
+          ) : (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={requestsOverTime}>
+                  <defs>
+                    <linearGradient id="colorRequests" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fill: '#737373', fontSize: 12 }} axisLine={false} tickLine={false} dy={10} />
+                  <YAxis tick={{ fill: '#737373', fontSize: 12 }} axisLine={false} tickLine={false} dx={-10} allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="requests" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorRequests)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold font-['Space_Grotesk'] text-white">Donors by Blood Group</h2>
+          </div>
+          {donorsByBloodGroup.length === 0 ? (
+            <div className="h-64 flex items-center justify-center text-neutral-600 text-sm">No data available</div>
+          ) : (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={donorsByBloodGroup}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {donorsByBloodGroup.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px', color: '#a3a3a3' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom split */}

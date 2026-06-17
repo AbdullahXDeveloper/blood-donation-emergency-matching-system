@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.use(protect);
 
-router.get('/stats', authorize('admin'), getDashboardStats);
-router.get('/users', authorize('admin'), getAllUsers);
+router.get('/stats', authorize('admin', 'coordinator'), getDashboardStats);
+router.get('/users', authorize('admin', 'coordinator'), getAllUsers);
 
 export default router;

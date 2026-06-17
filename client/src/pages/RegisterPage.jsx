@@ -8,10 +8,12 @@ import { getErrorMessage } from '../utils'
 
 const roles = [
   { value: 'donor',   label: '🩸 Donor',   desc: 'I want to donate blood' },
-  { value: 'patient', label: '🏥 Patient', desc: 'I need blood for a patient' },
+  { value: 'patient', label: '🤒 Patient', desc: 'I need blood for a patient' },
+  { value: 'hospital', label: '🏥 Hospital', desc: 'Manage hospital requests' },
+  { value: 'coordinator', label: '🤝 Coordinator', desc: 'Coordinate donations' },
 ]
 
-const roleHome = { donor: '/donor', patient: '/patient', admin: '/admin' }
+const roleHome = { donor: '/donor', patient: '/patient', admin: '/admin', hospital: '/hospital', coordinator: '/admin' }
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },

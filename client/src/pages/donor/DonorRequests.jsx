@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 export default function DonorRequests() {
   const [matches, setMatches] = useState([])
   const [loading, setLoading] = useState(true)
+  const [selectedMatch, setSelectedMatch] = useState(null)
 
   useEffect(() => { fetchMatches() }, [])
 
@@ -85,7 +86,7 @@ export default function DonorRequests() {
                         🔒 Contact details will be revealed after you accept
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => handleRespond(match._id, 'committed')}
+                        <button onClick={() => setSelectedMatch(match)}
                           className="btn-success flex-1 justify-center text-sm">
                           ✓ Accept & Donate
                         </button>
@@ -134,6 +135,48 @@ export default function DonorRequests() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Consent Modal */}
+      {selectedMatch && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-white/5">
+              <h3 className="text-xl font-bold text-white">Share Contact Information?</h3>
+            </div>
+            <div className="p-6 space-y-4 text-neutral-300 text-sm">
+              <p>
+                By accepting this request, your contact information (name, phone, email) will be 
+                <strong> immediately revealed</strong> to the hospital and the patient's representative.
+              </p>
+              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-400">
+                <p className="font-semibold mb-1">Important:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Only accept if you are fully committed to donating.</li>
+                  <li>Ensure you meet the eligibility criteria.</li>
+                  <li>The hospital may contact you soon after accepting.</li>
+                </ul>
+              </div>
+            </div>
+            <div className="p-4 border-t border-white/5 flex gap-3 bg-[#161616]">
+              <button 
+                onClick={() => setSelectedMatch(null)}
+                className="btn-ghost flex-1 text-neutral-400 hover:bg-white/5"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  handleRespond(selectedMatch._id, 'committed')
+                  setSelectedMatch(null)
+                }}
+                className="btn-success flex-1"
+              >
+                I Agree, Share Contact
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

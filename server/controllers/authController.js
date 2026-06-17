@@ -89,7 +89,7 @@ export const registerValidation = [
     .withMessage('Password must contain at least one number')
     .matches(/[^a-zA-Z0-9\s]/)
     .withMessage('Password must contain at least one special character/symbol'),
-  body('role').isIn(['donor', 'patient', 'hospital', 'admin']).withMessage('Invalid role'),
+  body('role').isIn(['donor', 'patient', 'hospital', 'coordinator', 'admin']).withMessage('Invalid role'),
 ];
 
 export const loginValidation = [

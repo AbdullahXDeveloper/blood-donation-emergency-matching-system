@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
+import BloodRequest from './models/BloodRequest.js';
 
 import authRoutes from './routes/auth.js';
 import donorRoutes from './routes/donors.js';
@@ -47,12 +48,38 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!', error: process.env.NODE_ENV === 'development' ? err.message : undefined });
 });
 
+// ── Auto-expiry background job (runs every 30 minutes) ────────────────────────
+const startExpiryJob = () => {
+  const runExpiry = async () => {
+    try {
+      const result = await BloodRequest.updateMany(
+        {
+          status: { $nin: ['fulfilled', 'expired', 'cancelled'] },
+          expiresAt: { $lt: new Date() },
+        },
+        { $set: { status: 'expired' } }
+      );
+      if (result.modifiedCount > 0) {
+        console.log(`⏰ Auto-expired ${result.modifiedCount} request(s)`);
+      }
+    } catch (err) {
+      console.error('Auto-expiry job error:', err.message);
+    }
+  };
+
+  // Run once immediately on startup, then every 30 minutes
+  runExpiry();
+  setInterval(runExpiry, 30 * 60 * 1000);
+  console.log('⏰ Auto-expiry job started (runs every 30 min)');
+};
+
 // Connect to Database & Start Server
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📡 Environment: ${process.env.NODE_ENV}`);
   });
+  startExpiryJob();
 });
 
 export default app;

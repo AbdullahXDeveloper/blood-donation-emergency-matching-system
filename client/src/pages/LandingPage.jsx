@@ -59,11 +59,6 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-neutral-600">
-          <span className="text-xs">scroll</span>
-          <div className="w-px h-12 bg-gradient-to-b from-neutral-600 to-transparent" />
-        </div>
       </section>
 
       {/* Stats Bar */}

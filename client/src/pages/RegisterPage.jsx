@@ -103,7 +103,16 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden isolate">
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/95 via-black/90 to-black/95 -z-20 pointer-events-none" />
+      {/* Background Image */}
+      <img
+        src="/sa.jpg"
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover -z-10 opacity-20 pointer-events-none"
+      />
+
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-red-800/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 

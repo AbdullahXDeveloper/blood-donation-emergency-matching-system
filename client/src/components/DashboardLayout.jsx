@@ -73,14 +73,14 @@ const DashboardLayout = () => {
 
       {bgAsset && bgAsset.type === 'image' && (
         <>
+          {/* Dark gradient overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/80 to-black/90 z-0 pointer-events-none" />
           <img
             key={bgAsset.src}
-            className="absolute inset-0 w-full h-full object-cover z-0 opacity-15 pointer-events-none"
+            className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none"
             src={bgAsset.src}
             alt="Background"
           />
-          {/* Dark gradient overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/80 to-black/90 z-0 pointer-events-none" />
         </>
       )}
 

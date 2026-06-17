@@ -24,6 +24,7 @@ export default function DonorDashboard() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [editMode, setEditMode] = useState(false)
+  const [matches, setMatches] = useState([])
   const [form, setForm] = useState({
     bloodGroup: '', city: '', area: '', phone: '', lastDonationDate: '', consentGiven: true
   })
@@ -71,6 +72,10 @@ export default function DonorDashboard() {
       })
       setIsOtherCity(data.city && !citiesPreset.includes(data.city));
       setIsOtherArea(data.area && !areasPreset.includes(data.area));
+
+      // Fetch match requests
+      const matchesRes = await donorAPI.getRequests()
+      setMatches(matchesRes.data || [])
     } catch {
       setEditMode(true)
     } finally {
@@ -103,6 +108,7 @@ export default function DonorDashboard() {
     }
   }
 
+  const pendingMatches = matches.filter(m => m.status === 'contacted')
   const eligible = profile ? isEligibleToDonate(profile.lastDonationDate) : false
 
   if (loading) return (
@@ -126,6 +132,22 @@ export default function DonorDashboard() {
           <button onClick={() => setEditMode(true)} className="btn-primary text-sm px-6 py-2.5">
             Complete Profile
           </button>
+        </div>
+      )}
+
+      {/* Active Matches Alert */}
+      {profile && pendingMatches.length > 0 && (
+        <div className="mb-8 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 flex items-center justify-between shadow-[0_0_20px_rgba(234,179,8,0.1)]">
+          <div className="flex items-center gap-4">
+            <span className="w-3 h-3 rounded-full bg-yellow-500 animate-pulse shrink-0" />
+            <div>
+              <h3 className="font-bold text-white text-lg font-['Space_Grotesk']">Active Match Requests</h3>
+              <p className="text-sm text-neutral-400">You have {pendingMatches.length} pending blood request match(es) in your area.</p>
+            </div>
+          </div>
+          <Link to="/donor/requests" className="px-6 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold rounded-xl transition-all">
+            View Matches
+          </Link>
         </div>
       )}
 

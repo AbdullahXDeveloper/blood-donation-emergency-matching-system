@@ -29,10 +29,13 @@ const roleLinks = {
   ],
 }
 
-// Map roles to their background video (null = no video)
-const roleVideos = {
-  donor:   '/Donate.mp4',
-  patient: '/patient.mp4',
+// Map roles to their background asset (video or image)
+const roleAssets = {
+  donor:       { type: 'video', src: '/Donate.mp4' },
+  patient:     { type: 'video', src: '/patient.mp4' },
+  hospital:    { type: 'image', src: '/kam.jpg' },
+  coordinator: { type: 'image', src: '/kam.jpg' },
+  admin:       { type: 'image', src: '/kam.jpg' },
 }
 
 const DashboardLayout = () => {
@@ -46,25 +49,38 @@ const DashboardLayout = () => {
   }
 
   const links   = user ? roleLinks[user.role] : []
-  const bgVideo = user ? roleVideos[user.role] : null
+  const bgAsset = user ? roleAssets[user.role] : null
 
   return (
     <div className="min-h-screen bg-[#080808] text-[#f5f5f5] flex relative overflow-hidden">
 
-      {/* ── Role-based background video ── */}
-      {bgVideo && (
+      {/* ── Role-based background asset ── */}
+      {bgAsset && bgAsset.type === 'video' && (
         <>
           <video
-            key={bgVideo}
+            key={bgAsset.src}
             autoPlay
             muted
             loop
             playsInline
             className="absolute inset-0 w-full h-full object-cover z-0"
-            src={bgVideo}
+            src={bgAsset.src}
           />
           {/* Dark gradient overlay for readability */}
           <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-black/70 to-black/85 z-0 pointer-events-none" />
+        </>
+      )}
+
+      {bgAsset && bgAsset.type === 'image' && (
+        <>
+          <img
+            key={bgAsset.src}
+            className="absolute inset-0 w-full h-full object-cover z-0 opacity-15 pointer-events-none"
+            src={bgAsset.src}
+            alt="Background"
+          />
+          {/* Dark gradient overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/80 to-black/90 z-0 pointer-events-none" />
         </>
       )}
 

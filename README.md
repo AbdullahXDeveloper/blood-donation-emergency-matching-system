@@ -130,6 +130,7 @@ npm run dev
 ### 5. Mock Demo Logins
 You can use these pre-loaded accounts to test the workflows:
 - **Super Admin:** `superadmin@lifelink.com` / `SuperAdminSecure123!`
+- **Demo Coordinator:** `coordinator@lifelink.com` / `CoordinatorSecure123!` (affiliated with Aga Khan Hospital)
 - **Demo Admin:** `admin@demo.com` / `Admin1234`
 - **Demo Donor:** `donor@demo.com` / `Donor1234` (O+ group)
 - **Demo Patient:** `patient@demo.com` / `Patient1234` (O+ group)

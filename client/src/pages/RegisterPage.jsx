@@ -7,9 +7,8 @@ import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils'
 
 const roles = [
-  { value: 'donor',    label: '🩸 Donor',    desc: 'I want to donate blood' },
-  { value: 'patient',  label: '🏥 Patient',  desc: 'I need blood for a patient' },
-  { value: 'admin',    label: '⚙️ Admin',    desc: 'System administrator' },
+  { value: 'donor',   label: '🩸 Donor',   desc: 'I want to donate blood' },
+  { value: 'patient', label: '🏥 Patient', desc: 'I need blood for a patient' },
 ]
 
 const roleHome = { donor: '/donor', patient: '/patient', admin: '/admin' }

@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+```gitignore
+# Documentation
+Details.md
+
+# Logs folder and all its contents
+Logs/
+```

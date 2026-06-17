@@ -80,7 +80,15 @@ export const getMe = async (req, res) => {
 export const registerValidation = [
   body('name').trim().isLength({ min: 2 }).withMessage('Name must be at least 2 characters'),
   body('email').isEmail().withMessage('Please provide a valid email'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters')
+    .matches(/[a-zA-Z]/)
+    .withMessage('Password must contain at least one letter')
+    .matches(/\d/)
+    .withMessage('Password must contain at least one number')
+    .matches(/[^a-zA-Z0-9\s]/)
+    .withMessage('Password must contain at least one special character/symbol'),
   body('role').isIn(['donor', 'patient', 'hospital', 'admin']).withMessage('Invalid role'),
 ];
 

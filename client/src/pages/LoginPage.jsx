@@ -46,8 +46,8 @@ export default function LoginPage() {
         <div className="bg-[#111] border border-white/5 rounded-2xl p-8 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 glow-red-sm">
-              <FiDroplet size={24} className="text-red-500" />
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <img src="/logo.png" alt="LifeLink Logo" className="w-14 h-14 object-contain" />
             </div>
             <h1 className="text-3xl font-bold text-white font-['Space_Grotesk']">Welcome Back</h1>
             <p className="text-neutral-400 text-sm mt-1">Sign in to LifeLink</p>

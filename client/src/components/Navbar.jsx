@@ -27,9 +27,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
-            <FiDroplet className="text-red-500" size={20} />
-          </div>
+          <img src="/logo.png" alt="LifeLink Logo" className="w-10 h-10 object-contain" />
           <span className="font-['Space_Grotesk'] font-bold text-2xl text-white">LifeLink</span>
         </Link>
 

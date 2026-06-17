@@ -41,7 +41,7 @@ const DashboardLayout = () => {
       {/* Mobile Header (replaces sidebar on mobile) */}
       <div className="md:hidden fixed top-0 w-full h-16 border-b border-white/5 bg-[#0d0d0d] z-50 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <FiDroplet className="text-red-500" size={20} />
+          <img src="/logo.png" alt="LifeLink Logo" className="w-8 h-8 object-contain" />
           <span className="font-['Space_Grotesk'] font-bold text-lg">LifeLink</span>
         </div>
         <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 text-neutral-400">
@@ -54,9 +54,7 @@ const DashboardLayout = () => {
         
         {/* Logo area */}
         <div className="hidden md:flex items-center gap-3 px-2 py-4 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center border border-red-500/20">
-            <FiDroplet className="text-red-500" size={16} />
-          </div>
+          <img src="/logo.png" alt="LifeLink Logo" className="w-8 h-8 object-contain" />
           <span className="font-['Space_Grotesk'] font-bold text-xl text-white">LifeLink</span>
         </div>
 

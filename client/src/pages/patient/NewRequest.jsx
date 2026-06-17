@@ -14,6 +14,8 @@ const urgencyInfo = {
   normal:   { label: '🟢 Normal',    desc: 'Can wait 2-3 days',                     color: 'border-green-700 bg-green-900/30 text-green-300' },
 }
 
+const citiesPreset = ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan', 'Peshawar', 'Quetta'];
+
 export default function NewRequest() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -21,6 +23,17 @@ export default function NewRequest() {
     patientName: '', bloodGroup: '', unitsRequired: 1,
     hospital: '', city: '', urgency: 'urgent', additionalNotes: ''
   })
+  const [isOtherCity, setIsOtherCity] = useState(false);
+
+  const handleCitySelect = (val) => {
+    if (val === 'Other') {
+      setIsOtherCity(true);
+      setForm(p => ({ ...p, city: '' }));
+    } else {
+      setIsOtherCity(false);
+      setForm(p => ({ ...p, city: val }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -82,9 +95,23 @@ export default function NewRequest() {
               </div>
               <div>
                 <label className="input-label">City *</label>
-                <input id="req-city" type="text" required value={form.city}
-                  onChange={e => setForm(p => ({ ...p, city: e.target.value }))}
-                  className="input" placeholder="e.g. Karachi" />
+                <select 
+                  value={isOtherCity ? 'Other' : (citiesPreset.includes(form.city) ? form.city : '')} 
+                  onChange={e => handleCitySelect(e.target.value)} 
+                  className="select mb-2"
+                  required={!isOtherCity}
+                >
+                  <option value="">Select city</option>
+                  {citiesPreset.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                  <option value="Other">Other</option>
+                </select>
+                {isOtherCity && (
+                  <input id="req-city" type="text" required value={form.city}
+                    onChange={e => setForm(p => ({ ...p, city: e.target.value }))}
+                    className="input" placeholder="Enter city name" />
+                )}
               </div>
             </div>
 

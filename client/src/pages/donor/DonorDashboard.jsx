@@ -15,6 +15,9 @@ const pageVariants = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.3 } }
 }
 
+const citiesPreset = ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan', 'Peshawar', 'Quetta'];
+const areasPreset = ['DHA', 'Gulshan', 'Clifton', 'Nazimabad', 'Bahria Town', 'Johar Town', 'Model Town', 'Cantt', 'Gulberg'];
+
 export default function DonorDashboard() {
   const { user } = useAuth()
   const [profile, setProfile] = useState(null)
@@ -24,6 +27,28 @@ export default function DonorDashboard() {
   const [form, setForm] = useState({
     bloodGroup: '', city: '', area: '', phone: '', lastDonationDate: '', consentGiven: true
   })
+  const [isOtherCity, setIsOtherCity] = useState(false);
+  const [isOtherArea, setIsOtherArea] = useState(false);
+
+  const handleCitySelect = (val) => {
+    if (val === 'Other') {
+      setIsOtherCity(true);
+      setForm(p => ({ ...p, city: '' }));
+    } else {
+      setIsOtherCity(false);
+      setForm(p => ({ ...p, city: val }));
+    }
+  };
+
+  const handleAreaSelect = (val) => {
+    if (val === 'Other') {
+      setIsOtherArea(true);
+      setForm(p => ({ ...p, area: '' }));
+    } else {
+      setIsOtherArea(false);
+      setForm(p => ({ ...p, area: val }));
+    }
+  };
 
   // We could fetch recent requests and history here if the backend provided it on getProfile,
   // but we'll stick to updating the UI for the profile and toggle first.
@@ -44,6 +69,8 @@ export default function DonorDashboard() {
         lastDonationDate: data.lastDonationDate ? data.lastDonationDate.split('T')[0] : '',
         consentGiven: data.consentGiven ?? true,
       })
+      setIsOtherCity(data.city && !citiesPreset.includes(data.city));
+      setIsOtherArea(data.area && !areasPreset.includes(data.area));
     } catch {
       setEditMode(true)
     } finally {
@@ -200,11 +227,51 @@ export default function DonorDashboard() {
                 </div>
                 <div>
                   <label className="input-label">City *</label>
-                  <input type="text" value={form.city} required onChange={e => setForm(p => ({ ...p, city: e.target.value }))} className="input" placeholder="e.g. Karachi" />
+                  <select 
+                    value={isOtherCity ? 'Other' : (citiesPreset.includes(form.city) ? form.city : '')} 
+                    onChange={e => handleCitySelect(e.target.value)} 
+                    className="select mb-2"
+                    required={!isOtherCity}
+                  >
+                    <option value="">Select city</option>
+                    {citiesPreset.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                    <option value="Other">Other</option>
+                  </select>
+                  {isOtherCity && (
+                    <input 
+                      type="text" 
+                      value={form.city} 
+                      required 
+                      onChange={e => setForm(p => ({ ...p, city: e.target.value }))} 
+                      className="input" 
+                      placeholder="Enter city name" 
+                    />
+                  )}
                 </div>
                 <div>
                   <label className="input-label">Area</label>
-                  <input type="text" value={form.area} onChange={e => setForm(p => ({ ...p, area: e.target.value }))} className="input" placeholder="e.g. DHA, Gulshan" />
+                  <select 
+                    value={isOtherArea ? 'Other' : (areasPreset.includes(form.area) ? form.area : '')} 
+                    onChange={e => handleAreaSelect(e.target.value)} 
+                    className="select mb-2"
+                  >
+                    <option value="">Select area</option>
+                    {areasPreset.map(a => (
+                      <option key={a} value={a}>{a}</option>
+                    ))}
+                    <option value="Other">Other</option>
+                  </select>
+                  {isOtherArea && (
+                    <input 
+                      type="text" 
+                      value={form.area} 
+                      onChange={e => setForm(p => ({ ...p, area: e.target.value }))} 
+                      className="input" 
+                      placeholder="Enter area name" 
+                    />
+                  )}
                 </div>
                 <div className="col-span-2">
                   <label className="input-label">Last Donation Date</label>

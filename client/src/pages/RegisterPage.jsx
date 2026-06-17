@@ -29,9 +29,23 @@ export default function RegisterPage() {
   const { register }            = useAuth()
   const navigate                = useNavigate()
 
+  const hasMinLength = form.password.length >= 8;
+  const hasLetter = /[a-zA-Z]/.test(form.password);
+  const hasNumber = /\d/.test(form.password);
+  const hasSymbol = /[^a-zA-Z0-9\s]/.test(form.password);
+  const isNotEmpty = form.password.length > 0;
+
+  const getRuleColor = (isValid) => {
+    if (isValid) return 'text-green-500';
+    return isNotEmpty ? 'text-red-500' : 'text-neutral-500';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return }
+    if (form.password.length < 8) { toast.error('Password must be at least 8 characters'); return }
+    if (!/[a-zA-Z]/.test(form.password)) { toast.error('Password must contain at least one letter'); return }
+    if (!/\d/.test(form.password)) { toast.error('Password must contain at least one number'); return }
+    if (!/[^a-zA-Z0-9\s]/.test(form.password)) { toast.error('Password must contain at least one special character/symbol'); return }
     setLoading(true)
     try {
       const user = await register(form)
@@ -53,8 +67,8 @@ export default function RegisterPage() {
         <div className="bg-[#111] border border-white/5 rounded-2xl p-8 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 glow-red-sm">
-              <FiDroplet size={24} className="text-red-500" />
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <img src="/logo.png" alt="LifeLink Logo" className="w-14 h-14 object-contain" />
             </div>
             <h1 className="text-3xl font-bold text-white font-['Space_Grotesk']">Create Account</h1>
             <p className="text-neutral-400 text-sm mt-1">Join the LifeLink network</p>
@@ -104,13 +118,36 @@ export default function RegisterPage() {
               <div className="relative">
                 <FiLock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
                 <input id="reg-password" type={showPass ? 'text' : 'password'} required
-                  minLength={6} value={form.password}
+                  minLength={8} value={form.password}
                   onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                  className="input pl-10 pr-10" placeholder="Min 6 characters" />
+                  className="input pl-10 pr-10" placeholder="Min 8 characters" />
                 <button type="button" onClick={() => setShowPass(!showPass)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300">
                   {showPass ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>
+              </div>
+
+              {/* Password strength requirements */}
+              <div className="mt-2 space-y-1.5 p-3 rounded-xl bg-neutral-900/50 border border-white/5">
+                <p className="text-[11px] text-neutral-400 font-semibold uppercase tracking-wider">Password Requirements</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                  <div className={`flex items-center gap-1.5 text-xs transition-colors duration-200 ${getRuleColor(hasMinLength)}`}>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
+                    <span>Min 8 characters</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 text-xs transition-colors duration-200 ${getRuleColor(hasLetter)}`}>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
+                    <span>At least 1 letter</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 text-xs transition-colors duration-200 ${getRuleColor(hasNumber)}`}>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
+                    <span>At least 1 number</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 text-xs transition-colors duration-200 ${getRuleColor(hasSymbol)}`}>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
+                    <span>At least 1 symbol</span>
+                  </div>
+                </div>
               </div>
             </div>
 

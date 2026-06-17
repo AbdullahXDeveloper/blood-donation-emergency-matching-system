@@ -64,8 +64,10 @@ export const matchAPI = {
 
 // ── Dashboard ─────────────────────────────────────────────
 export const dashboardAPI = {
-  getStats: () => api.get('/dashboard/stats'),
-  getUsers: (params) => api.get('/dashboard/users', { params }),
+  getStats:    ()           => api.get('/dashboard/stats'),
+  getUsers:    (params)     => api.get('/dashboard/users', { params }),
+  getPending:  ()           => api.get('/dashboard/pending'),
+  approveUser: (id, action) => api.put(`/dashboard/users/${id}/approve`, { action }),
 }
 
 export default api

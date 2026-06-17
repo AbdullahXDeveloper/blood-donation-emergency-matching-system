@@ -35,6 +35,13 @@ export const triggerMatching = async (req, res) => {
     const request = await BloodRequest.findById(requestId);
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
+    if (req.user.role === 'hospital' && request.hospital.toLowerCase() !== req.user.name.toLowerCase()) {
+      return res.status(403).json({ message: 'Not authorized to trigger matching for other hospitals' });
+    }
+    if (req.user.role === 'coordinator' && request.hospital.toLowerCase() !== req.user.hospitalAffiliation.toLowerCase()) {
+      return res.status(403).json({ message: 'Not authorized to trigger matching for other hospitals' });
+    }
+
     if (!['verified', 'matching'].includes(request.status)) {
       return res.status(400).json({ message: 'Request must be verified before matching' });
     }
@@ -83,6 +90,19 @@ export const triggerMatching = async (req, res) => {
 // @route   GET /api/match/:requestId
 export const getMatches = async (req, res) => {
   try {
+    if (req.user.role === 'hospital') {
+      const request = await BloodRequest.findById(req.params.requestId);
+      if (request && request.hospital.toLowerCase() !== req.user.name.toLowerCase()) {
+        return res.status(403).json({ message: 'Not authorized to view matches for other hospitals' });
+      }
+    }
+    if (req.user.role === 'coordinator') {
+      const request = await BloodRequest.findById(req.params.requestId);
+      if (request && request.hospital.toLowerCase() !== req.user.hospitalAffiliation.toLowerCase()) {
+        return res.status(403).json({ message: 'Not authorized to view matches for other hospitals' });
+      }
+    }
+
     const matches = await DonorMatch.find({ requestId: req.params.requestId })
       .populate({
         path: 'donorId',
@@ -115,6 +135,19 @@ export const updateMatchStatus = async (req, res) => {
     const { status } = req.body;
     const match = await DonorMatch.findById(req.params.matchId);
     if (!match) return res.status(404).json({ message: 'Match not found' });
+
+    if (req.user.role === 'hospital') {
+      const request = await BloodRequest.findById(match.requestId);
+      if (request && request.hospital.toLowerCase() !== req.user.name.toLowerCase()) {
+        return res.status(403).json({ message: 'Not authorized to update match status for other hospitals' });
+      }
+    }
+    if (req.user.role === 'coordinator') {
+      const request = await BloodRequest.findById(match.requestId);
+      if (request && request.hospital.toLowerCase() !== req.user.hospitalAffiliation.toLowerCase()) {
+        return res.status(403).json({ message: 'Not authorized to update match status for other hospitals' });
+      }
+    }
 
     const prevStatus = match.status;
     match.status = status;

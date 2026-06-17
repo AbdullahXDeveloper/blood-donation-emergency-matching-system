@@ -135,3 +135,66 @@ export const getAllUsers = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+// @desc    Get pending approval users
+// @route   GET /api/dashboard/pending
+// admin sees pending hospitals; hospital sees pending coordinators affiliated with them
+export const getPendingUsers = async (req, res) => {
+  try {
+    let filter = { isApproved: false };
+
+    if (req.user.role === 'admin') {
+      filter.role = 'hospital';
+    } else if (req.user.role === 'hospital') {
+      filter.role = 'coordinator';
+      filter.hospitalAffiliation = { $regex: new RegExp(`^${req.user.name}$`, 'i') };
+    } else {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
+    res.json({ users, total: users.length });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Approve or reject a pending user
+// @route   PUT /api/dashboard/users/:id/approve
+export const approveUser = async (req, res) => {
+  try {
+    const { action } = req.body; // 'approve' or 'reject'
+    const target = await User.findById(req.params.id);
+    if (!target) return res.status(404).json({ message: 'User not found' });
+
+    // Admin can only approve hospitals
+    if (req.user.role === 'admin' && target.role !== 'hospital') {
+      return res.status(403).json({ message: 'Admins can only approve hospital accounts' });
+    }
+
+    // Hospital can only approve coordinators affiliated with them
+    if (req.user.role === 'hospital') {
+      if (target.role !== 'coordinator') {
+        return res.status(403).json({ message: 'Hospitals can only approve coordinator accounts' });
+      }
+      if (target.hospitalAffiliation.toLowerCase() !== req.user.name.toLowerCase()) {
+        return res.status(403).json({ message: 'This coordinator is not affiliated with your hospital' });
+      }
+    }
+
+    if (action === 'approve') {
+      target.isApproved = true;
+      target.approvedBy = req.user._id;
+      await target.save();
+      res.json({ message: `${target.name} has been approved`, user: target });
+    } else if (action === 'reject') {
+      await User.findByIdAndDelete(req.params.id);
+      res.json({ message: `${target.name}'s registration has been rejected and removed` });
+    } else {
+      res.status(400).json({ message: 'Invalid action. Use "approve" or "reject"' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+

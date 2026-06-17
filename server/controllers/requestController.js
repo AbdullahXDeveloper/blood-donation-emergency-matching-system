@@ -84,6 +84,8 @@ export const getAllRequests = async (req, res) => {
     
     if (req.user.role === 'hospital') {
       filter.hospital = { $regex: new RegExp(`^${req.user.name}$`, 'i') };
+    } else if (req.user.role === 'coordinator') {
+      filter.hospital = { $regex: new RegExp(`^${req.user.hospitalAffiliation}$`, 'i') };
     }
 
     const requests = await BloodRequest.find(filter)
@@ -176,6 +178,9 @@ export const cancelRequest = async (req, res) => {
     if (req.user.role === 'hospital' && request.hospital.toLowerCase() !== req.user.name.toLowerCase()) {
       return res.status(403).json({ message: 'Not authorized to cancel requests for other hospitals' });
     }
+    if (req.user.role === 'coordinator' && request.hospital.toLowerCase() !== req.user.hospitalAffiliation.toLowerCase()) {
+      return res.status(403).json({ message: 'Not authorized to cancel requests for other hospitals' });
+    }
 
     // Only creator or admin/hospital/coordinator can cancel
     if (
@@ -207,6 +212,9 @@ export const closeRequest = async (req, res) => {
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
     if (req.user.role === 'hospital' && request.hospital.toLowerCase() !== req.user.name.toLowerCase()) {
+      return res.status(403).json({ message: 'Not authorized to close requests for other hospitals' });
+    }
+    if (req.user.role === 'coordinator' && request.hospital.toLowerCase() !== req.user.hospitalAffiliation.toLowerCase()) {
       return res.status(403).json({ message: 'Not authorized to close requests for other hospitals' });
     }
 

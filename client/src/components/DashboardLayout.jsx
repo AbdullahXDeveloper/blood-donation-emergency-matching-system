@@ -23,6 +23,10 @@ const roleLinks = {
     { to: '/admin/users', label: 'Users', icon: FiUsers },
     { to: '/admin/requests', label: 'Requests', icon: FiActivity }
   ],
+  coordinator: [
+    { to: '/admin', label: 'Dashboard', icon: FiHome },
+    { to: '/admin/requests', label: 'Requests', icon: FiActivity }
+  ],
 }
 
 // Map roles to their background video (null = no video)

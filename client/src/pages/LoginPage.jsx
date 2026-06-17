@@ -19,7 +19,7 @@ export default function LoginPage() {
   const { login }               = useAuth()
   const navigate                = useNavigate()
 
-  const roleHome = { donor: '/donor', patient: '/patient', admin: '/admin' }
+  const roleHome = { donor: '/donor', patient: '/patient', admin: '/admin', hospital: '/hospital', coordinator: '/admin' }
 
   const handleSubmit = async (e) => {
     e.preventDefault()

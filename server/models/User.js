@@ -27,6 +27,22 @@ const userSchema = new mongoose.Schema({
     enum: ['donor', 'patient', 'hospital', 'coordinator', 'admin'],
     default: 'donor',
   },
+  // Approval workflow
+  isApproved: {
+    type: Boolean,
+    default: true, // donors/patients/admin auto-approved; overridden for hospital/coordinator
+  },
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
+  // For coordinators: which hospital they belong to
+  hospitalAffiliation: {
+    type: String,
+    trim: true,
+    default: '',
+  },
 
 }, { timestamps: true });
 

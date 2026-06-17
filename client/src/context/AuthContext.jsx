@@ -38,6 +38,8 @@ export const AuthProvider = ({ children }) => {
 
   const register = useCallback(async (formData) => {
     const { data } = await authAPI.register(formData)
+    // Pending approval — no token returned
+    if (data.pending) return data
     localStorage.setItem('token', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     setToken(data.token)

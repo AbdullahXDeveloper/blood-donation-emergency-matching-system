@@ -6,16 +6,36 @@ import { generateToken } from '../utils/generateToken.js';
 // @route   POST /api/auth/register
 export const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, hospitalAffiliation } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
 
-    const user = await User.create({ name, email, password, role });
-    const token = generateToken(user._id);
+    // hospital and coordinator require approval — do NOT auto-approve
+    const requiresApproval = ['hospital', 'coordinator'].includes(role);
 
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role,
+      hospitalAffiliation: hospitalAffiliation || '',
+      isApproved: !requiresApproval,
+    });
+
+    if (requiresApproval) {
+      // Return a pending status — no token, no auto-login
+      return res.status(201).json({
+        pending: true,
+        message: role === 'hospital'
+          ? 'Registration submitted. Awaiting approval from the Admin.'
+          : 'Registration submitted. Awaiting approval from your Hospital.',
+      });
+    }
+
+    const token = generateToken(user._id);
     res.status(201).json({
       token,
       user: {
@@ -42,6 +62,15 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    if (!user.isApproved) {
+      return res.status(403).json({
+        message: user.role === 'hospital'
+          ? 'Your hospital account is pending approval from the Admin.'
+          : 'Your coordinator account is pending approval from your Hospital.',
+        code: 'PENDING_APPROVAL',
+      });
+    }
+
     const token = generateToken(user._id);
 
     res.json({
@@ -58,6 +87,7 @@ export const login = async (req, res) => {
     res.status(500).json({ message: 'Server error during login', error: error.message });
   }
 };
+
 
 // @desc    Get current user
 // @route   GET /api/auth/me

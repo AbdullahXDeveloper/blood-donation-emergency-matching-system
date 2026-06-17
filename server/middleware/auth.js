@@ -18,6 +18,9 @@ export const protect = async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: 'User not found' });
     }
+    if (!req.user.isApproved) {
+      return res.status(403).json({ message: 'Account pending approval', code: 'PENDING_APPROVAL' });
+    }
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Not authorized, token failed' });

@@ -2,15 +2,15 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
-import { FiDroplet, FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi'
+import { FiDroplet, FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiClock } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils'
 
 const roles = [
-  { value: 'donor',   label: '🩸 Donor',   desc: 'I want to donate blood' },
-  { value: 'patient', label: '🤒 Patient', desc: 'I need blood for a patient' },
-  { value: 'hospital', label: '🏥 Hospital', desc: 'Manage hospital requests' },
-  { value: 'coordinator', label: '🤝 Coordinator', desc: 'Coordinate donations' },
+  { value: 'donor',       label: '🩸 Donor',       desc: 'I want to donate blood' },
+  { value: 'patient',     label: '🤒 Patient',      desc: 'I need blood for a patient' },
+  { value: 'hospital',    label: '🏥 Hospital',     desc: 'Manage hospital requests' },
+  { value: 'coordinator', label: '🤝 Coordinator',  desc: 'Coordinate donations' },
 ]
 
 const roleHome = { donor: '/donor', patient: '/patient', admin: '/admin', hospital: '/hospital', coordinator: '/admin' }
@@ -22,14 +22,15 @@ const pageVariants = {
 }
 
 export default function RegisterPage() {
-  const [searchParams]          = useSearchParams()
-  const [form, setForm]         = useState({
-    name: '', email: '', password: '', role: searchParams.get('role') || 'donor'
+  const [searchParams]             = useSearchParams()
+  const [form, setForm]            = useState({
+    name: '', email: '', password: '', role: searchParams.get('role') || 'donor', hospitalAffiliation: ''
   })
-  const [showPass, setShowPass] = useState(false)
-  const [loading, setLoading]   = useState(false)
-  const { register }            = useAuth()
-  const navigate                = useNavigate()
+  const [showPass, setShowPass]    = useState(false)
+  const [loading, setLoading]      = useState(false)
+  const [pendingMsg, setPendingMsg] = useState('')
+  const { register }               = useAuth()
+  const navigate                   = useNavigate()
 
   const hasMinLength = form.password.length >= 8;
   const hasLetter = /[a-zA-Z]/.test(form.password);
@@ -48,16 +49,57 @@ export default function RegisterPage() {
     if (!/[a-zA-Z]/.test(form.password)) { toast.error('Password must contain at least one letter'); return }
     if (!/\d/.test(form.password)) { toast.error('Password must contain at least one number'); return }
     if (!/[^a-zA-Z0-9\s]/.test(form.password)) { toast.error('Password must contain at least one special character/symbol'); return }
+    if (form.role === 'coordinator' && !form.hospitalAffiliation.trim()) {
+      toast.error('Please enter the name of your hospital affiliation'); return
+    }
     setLoading(true)
     try {
-      const user = await register(form)
-      toast.success(`Account created! Welcome, ${user.name}!`)
-      navigate(roleHome[user.role] || '/')
+      const result = await register(form)
+      // If result has pending=true, hospital/coordinator awaiting approval
+      if (result?.pending) {
+        setPendingMsg(result.message)
+      } else {
+        toast.success(`Account created! Welcome, ${result.name}!`)
+        navigate(roleHome[result.role] || '/')
+      }
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show pending approval screen
+  if (pendingMsg) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 py-12">
+        <motion.div variants={pageVariants} initial="initial" animate="animate" className="w-full max-w-md">
+          <div className="bg-[#111] border border-white/5 rounded-2xl p-10 shadow-2xl text-center">
+            <div className="w-16 h-16 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center mx-auto mb-5">
+              <FiClock size={32} className="text-yellow-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-3 font-['Space_Grotesk']">Pending Approval</h1>
+            <p className="text-neutral-400 text-sm mb-6">{pendingMsg}</p>
+            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 text-left text-xs text-yellow-300 space-y-1 mb-6">
+              {form.role === 'hospital' ? (
+                <>
+                  <p>✔ Your hospital account has been created.</p>
+                  <p>✔ The Admin will review and approve your account.</p>
+                  <p>✔ You can login once approved.</p>
+                </>
+              ) : (
+                <>
+                  <p>✔ Your coordinator account has been created.</p>
+                  <p>✔ <strong>{form.hospitalAffiliation}</strong> hospital admins will review your request.</p>
+                  <p>✔ You can login once approved.</p>
+                </>
+              )}
+            </div>
+            <Link to="/login" className="btn-primary w-full">Go to Login</Link>
+          </div>
+        </motion.div>
+      </div>
+    )
   }
 
   return (
@@ -82,7 +124,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-2">
               {roles.map(r => (
                 <button key={r.value} type="button"
-                  onClick={() => setForm(p => ({ ...p, role: r.value }))}
+                  onClick={() => setForm(p => ({ ...p, role: r.value, hospitalAffiliation: '' }))}
                   className={`p-3 rounded-xl border text-left transition-all ${
                     form.role === r.value
                       ? 'border-red-500 bg-red-500/10 text-white'
@@ -94,6 +136,17 @@ export default function RegisterPage() {
                 </button>
               ))}
             </div>
+            {/* Approval notice */}
+            {(form.role === 'hospital' || form.role === 'coordinator') && (
+              <div className="mt-3 flex items-start gap-2 bg-yellow-500/5 border border-yellow-500/20 rounded-xl px-3 py-2">
+                <FiClock size={14} className="text-yellow-400 mt-0.5 shrink-0" />
+                <p className="text-xs text-yellow-300">
+                  {form.role === 'hospital'
+                    ? 'Hospital accounts require Admin approval before you can login.'
+                    : 'Coordinator accounts require Hospital approval before you can login.'}
+                </p>
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -103,9 +156,28 @@ export default function RegisterPage() {
                 <FiUser size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
                 <input id="reg-name" type="text" required value={form.name}
                   onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                  className="input pl-10" placeholder="Your full name" />
+                  className="input pl-10"
+                  placeholder={form.role === 'hospital' ? 'Official hospital name' : 'Your full name'} />
               </div>
+              {form.role === 'hospital' && (
+                <p className="text-xs text-neutral-500 mt-1">⚠ Use your official hospital name — this is used to match blood requests.</p>
+              )}
             </div>
+
+            {/* Hospital affiliation field for coordinators */}
+            {form.role === 'coordinator' && (
+              <div>
+                <label className="input-label">Hospital Affiliation</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">🏥</span>
+                  <input id="reg-hospital" type="text" required value={form.hospitalAffiliation}
+                    onChange={e => setForm(p => ({ ...p, hospitalAffiliation: e.target.value }))}
+                    className="input pl-9" placeholder="Name of your hospital" />
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">Must match the exact hospital name registered in the system.</p>
+              </div>
+            )}
+
             <div>
               <label className="input-label">Email Address</label>
               <div className="relative">
